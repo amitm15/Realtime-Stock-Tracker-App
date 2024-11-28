@@ -1,0 +1,178 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% load filter %}
+{% block title %}
+Stock Tracker
+{% endblock %}
+
+{% block css %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        margin-top: 50px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .table-container {
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+    }
+
+    .table th, 
+    .table td {
+        border: 1px solid #e0e0e0;
+        padding: 12px 15px;
+        text-align: left;
+        font-size: 1rem;
+    }
+
+    .table thead {
+        background-color: #f8f9fa;
+        color: #333333;
+        font-weight: 600;
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #f9f9f9;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .table th {
+        text-transform: uppercase;
+    }
+
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Live Stock Tracker</h1>
+    <p class="text-center">Monitor real-time updates and details for your selected stocks below:</p>
+    <div class="Scroll" style="overflow: auto">
+    <table class="table-container">
+    <table class="table table-hover">
+        <thead>
+        <tr class="table-info">
+            <th scope="col">Sr No.</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Opening Price</th>
+            <th scope="col">HIGHEST</th>
+            <th scope="col">LOWEST</th>
+            <th scope="col">Closing Price</th>
+            <th scope="col">Adjusted Closing Price</th>
+            <th scope="col">Change</th>
+            <th scope="col">Volume</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for key, value in data.items %}
+        <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{key}}</td>
+            <td id="{{key}}_open">{{ value|get:"open" }}</td>
+            <td id="{{key}}_high">{{ value|get:"high" }}</td>
+            <td id="{{key}}_low">{{ value|get:"low" }}</td>
+            <td id="{{key}}_close">{{ value|get:"close" }}</td>
+            <td id="{{key}}_adjclose">{{ value|get:"adjclose" }}</td>
+            <td id="{{key}}_change">
+                <script>
+                    var change = document.getElementById("{{key}}_open").innerHTML - document.getElementById("{{key}}_close").innerHTML;
+                    if(change>0){
+                        document.getElementById("{{key}}_change").style.color = "green";
+                        document.getElementById("{{key}}_change").innerHTML = "+" + Number((change).toFixed(4));
+                    }else if (change < 0){
+                        document.getElementById("{{key}}_change").style.color = "red";
+                        document.getElementById("{{key}}_change").innerHTML = Number((change).toFixed(4));
+                    }
+                </script>
+            </td>
+            <td id="{{key}}_volume">{{ value|get:"volume" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </table>
+</div>
+</div>
+{{ room_name|json_script:"room-name" }}
+<script>
+    const roomName = JSON.parse(document.getElementById("room-name").textContent);
+    var queryString = window.location.search;
+    queryString = queryString.substring(1);
+    {% comment %} console.log(queryString); {% endcomment %}
+    const stockSocket = new WebSocket(
+        'ws://' + 
+        window.location.host +
+        '/ws/stock/' +
+        roomName +
+        '/' +
+        '?' +
+        queryString
+    );
+    
+    stockSocket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+        console.log(data);
+        for (const [key, value] of Object.entries(data)){
+
+            document.getElementById(key+"_open").innerHTML = value['open'];
+
+            document.getElementById(key+"_high").innerHTML = value['high'];
+
+            document.getElementById(key+"_low").innerHTML = value['low'];
+
+            document.getElementById(key+"_close").innerHTML = value['close'];
+            
+            document.getElementById(key+"_adjclose").innerHTML = value['adjclose'];
+            document.getElementById(key+"_volume").innerHTML = value['volume'];
+            
+            var change = document.getElementById(key+"_open").innerHTML - document.getElementById(key+"_close").innerHTML;
+            change = Number((change).toFixed(4));
+            if(change>0){
+                document.getElementById(key + "_change").style.color = "green";
+                document.getElementById(key + "_change").innerHTML = "+" + change;
+            }else if (change < 0){
+                document.getElementById(key + "_change").style.color = "red";
+                document.getElementById(key + "_change").innerHTML = change;
+            }
+        }
+    };
+</script>
+
+{% endblock %}
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

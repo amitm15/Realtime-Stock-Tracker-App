@@ -1,0 +1,90 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+
+{% block title %}
+Stock Picker
+{% endblock %}
+
+{% block css %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        margin-top: 50px;
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333333;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #555555;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333333;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    select {
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        font-size: 1rem;
+        color: #555555;
+        height: 400px;
+    }
+
+    select:focus {
+        border-color: #ff9800;
+        box-shadow: 0 0 4px rgba(255, 152, 0, 0.5);
+    }
+
+    .container{
+        height: 700px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Live Stock Tracker</h1>
+    <p>Track and manage your favorite stocks with ease.</p>
+    <form action="/track">
+        <label for="stockpicker">Choose Stocks to Monitor:</label>
+        <select id="stockpicker" class="form-select form-select-lg mb-3"  multiple aria-label="Multiple select example" name="stockpicker">
+            <option disabled selected>Select stocks from the list</option>
+            {% for key, value in stocks.items %}
+                <option value="{{ key }}">{{ value }}</option>
+            {% endfor %}
+        </select>
+        <div class="d-grid gap-2 mt-2">
+            <input class="btn btn-info" type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}
